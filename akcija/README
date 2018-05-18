@@ -1,0 +1,1 @@
+Turns out that `read().split()` is faster than `readlines()`. Huh.
