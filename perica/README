@@ -1,0 +1,3 @@
+This uses the formula for finding the nth diagonal of pascal's triangle. For
+whatever reason, this appeared to match the incidence of the final number in
+the conbinatoric sequence of the sorted list of keys.
