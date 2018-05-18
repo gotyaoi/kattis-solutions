@@ -1,0 +1,6 @@
+I implemented this same algorithm in python, but it was taking a few seconds to
+finish on a long input file, and the time limit was 1 second, so I did it in C,
+as kattis doesn't support rust right now.
+
+This is what C does to a person. Multidimensional arrays represented by a
+calculated offset.
