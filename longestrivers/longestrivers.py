@@ -23,12 +23,16 @@ def main():
             to_check.append((i, dist))
     #max_len contains the best case length for each river, along with the river's index
     max_len = [None]*numrivers
-    while to_check:
-        i, dist = to_check.pop()
-        if i >= numconfluences:
-            max_len[i-numconfluences] = (dist, i-numconfluences)
-        else:
-            to_check.extend([(x, dist+d) for x, d in upstream[i]])
+    try:
+        while True:
+            i, dist = to_check.pop()
+            if i >= numconfluences:
+                max_len[i-numconfluences] = (dist, i-numconfluences)
+            else:
+                to_check.extend([(x, dist+d) for x, d in upstream[i]])
+    except IndexError:
+        pass
+    max_len.sort()
     #state1 implicitely contains all confluences at the start
     #state2 is all rivers which are long and all confluences with short upstreams but which turn long
     state2 = [(dist, i) for i, (conf, dist) in enumerate(points[numconfluences:], start=numconfluences)]
@@ -36,10 +40,10 @@ def main():
     #state3 implicitely contains all rivers which are short and all confluences with short upstreams and which stay short
     #lengths is the length of each upstream point for each confluence
     lengths = [[] for _ in range(numconfluences)]
-    ranks = [0]*numrivers
-    for length, riverindex in sorted(max_len):
-        try:
-            priority, index = heappop(state2)
+    ranks = [1]*numrivers
+    priority, index = heappop(state2)
+    try:
+        for length, riverindex in max_len:
             while priority <= length:
                 #index goes to state3
                 downstreamindex = points[index][0]
@@ -54,11 +58,10 @@ def main():
                         else:
                             heappush(state2, (conflen, downstreamindex))
                 priority, index = heappop(state2)
-            heappush(state2, (priority, index))
-        except IndexError:
-            #state2 is empty
-            pass
-        ranks[riverindex] = len(state2) + 1
-    for i, name in enumerate(rivernames):
-        print(name, ranks[i])
+            ranks[riverindex] = len(state2) + 2
+    except IndexError:
+        #state2 is empty
+        pass
+    for name, rank in zip(rivernames, ranks):
+        print(name, rank)
 main()
