@@ -4,7 +4,7 @@ def main():
     numrivers, numconfluences = [int(x) for x in input().split()]
     data = sys.stdin.read().splitlines()
     #points contains confluences first, then rivers
-    points = [(int(conf)-1, int(dist))
+    points = [(int(dist), int(conf)-1)
               for conf, dist
               in [line.split()
                   for line
@@ -12,11 +12,11 @@ def main():
     rivernames = []
     for name, conf, dist in [line.split() for line in data[:numrivers]]:
         rivernames.append(name)
-        points.append((int(conf)-1, int(dist)))
+        points.append((int(dist), int(conf)-1))
     #upstream contains all upstream points for each confluence
     upstream = [[] for _ in range(numconfluences)]
     to_check = []
-    for i, (conf, dist) in enumerate(points):
+    for i, (dist, conf) in enumerate(points):
         if conf != -1:
             upstream[conf].append((i, dist))
         else:
@@ -35,29 +35,29 @@ def main():
     max_len.sort()
     #state1 implicitely contains all confluences at the start
     #state2 is all rivers which are long and all confluences with short upstreams but which turn long
-    state2 = [(dist, i) for i, (conf, dist) in enumerate(points[numconfluences:], start=numconfluences)]
+    state2 = points[numconfluences:]
     heapify(state2)
     #state3 implicitely contains all rivers which are short and all confluences with short upstreams and which stay short
     #lengths is the length of each upstream point for each confluence
     lengths = [[] for _ in range(numconfluences)]
     ranks = [1]*numrivers
-    priority, index = heappop(state2)
+    priority, downstreamindex = heappop(state2)
     try:
         for length, riverindex in max_len:
             while priority <= length:
                 #index goes to state3
-                downstreamindex = points[index][0]
                 if downstreamindex != -1:
                     lengths[downstreamindex].append(priority)
                     if len(upstream[downstreamindex]) == len(lengths[downstreamindex]):
-                        conflen = min([x for x in lengths[downstreamindex]]) + points[downstreamindex][1]
+                        p_dist, p_conf = points[downstreamindex]
+                        conflen = min([x for x in lengths[downstreamindex]]) + p_dist
                         if conflen <= length:
-                            index = downstreamindex
+                            downstreamindex = p_conf
                             priority = conflen
                             continue
                         else:
-                            heappush(state2, (conflen, downstreamindex))
-                priority, index = heappop(state2)
+                            heappush(state2, (conflen, p_conf))
+                priority, downstreamindex = heappop(state2)
             ranks[riverindex] = len(state2) + 2
     except IndexError:
         #state2 is empty
